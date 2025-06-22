@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="/items/create">Create Item</a>
+<ul>
+    {% for item in items %}
+        <li>
+            <a href="/items/{{ item.id }}">{{ item.name }}</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
