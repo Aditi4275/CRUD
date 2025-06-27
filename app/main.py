@@ -17,12 +17,23 @@ templates = Jinja2Templates(directory="app/templates")
 
 @app.on_event("startup")
 async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        print(f"Database connection failed: {e}")
+
 
 async def get_db():
     async with SessionLocal() as session:
-        yield session
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
 
 # API endpoints (OpenAPI auto-docs)
 @app.get("/api/items/", response_model=list[ItemRead])
@@ -91,3 +102,8 @@ async def item_delete(item_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404)
     await delete_item(db, item)
     return RedirectResponse("/", status_code=303)
+
+@app.get("/health")
+async def health_check(db: AsyncSession = Depends(get_db)):
+    await db.execute(text("SELECT 1"))
+    return {"status": "ok"}

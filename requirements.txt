@@ -10,3 +10,4 @@ httpx
 coverage
 pytest-asyncio
 asgi-lifespan
+python-multipart
