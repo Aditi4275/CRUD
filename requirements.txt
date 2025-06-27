@@ -8,3 +8,5 @@ alembic
 pytest
 httpx
 coverage
+pytest-asyncio
+asgi-lifespan
